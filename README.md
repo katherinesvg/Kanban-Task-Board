@@ -1,73 +1,44 @@
-# React + TypeScript + Vite
+# Kanban Style Task Board
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A beautiful, fully-featured Kanban-style task board built with **React + TypeScript + Supabase**. Inspired by Linear and Asana.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Drag-and-drop** task cards between columns (To Do, In Progress, In Review, Done)
+- **Guest accounts** via Supabase anonymous auth — no signup required
+- **Real-time updates** via Supabase subscriptions
+- **Task detail panel** with inline editing (slide-over)
+- **Team members** with color-coded avatars
+- **Labels / tags** with custom colors and board filtering
+- **Comments** on tasks with timestamps
+- **Activity log** tracking status/priority/assignee changes
+- **Due date indicators** (overdue, today, tomorrow, upcoming)
+- **Priority levels** (Low / Normal / High) with visual badges
+- **Search & filtering** by title, priority, assignee, and label
+- **Board stats** — total, in-progress, completed, overdue + completion %
+- **Row Level Security** — each user only sees their own data
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Layer     | Tech                        |
+|-----------|-----------------------------|
+| Frontend  | React 18 + TypeScript       |
+| Styling   | Tailwind CSS (dark theme)   |
+| DnD       | @dnd-kit/core + sortable    |
+| Database  | Supabase (PostgreSQL)       |
+| Auth      | Supabase Anonymous Auth     |
+| Build     | Vite 5                      |
+| Hosting   | Vercel / Netlify / Cloudflare Pages |
 
-## Expanding the ESLint configuration
+### Tables
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Table | Purpose |
+|---|---|
+| `tasks` | Core task records (title, status, priority, due_date, …) |
+| `team_members` | Virtual team members created by each guest user |
+| `labels` | Custom labels/tags |
+| `task_labels` | Many-to-many junction: tasks ↔ labels |
+| `comments` | Comments on tasks |
+| `activity_log` | Audit trail of task changes |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+All tables use **Row Level Security (RLS)** — users can only read/write their own data.
