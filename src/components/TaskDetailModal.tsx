@@ -112,22 +112,126 @@ export function TaskDetailModal({ task, onClose, onUpdated }: Props) {
         </div>
 
         {/* Comment Input */}
-        <div className="px-5 py-4 border-t border-gray-800 flex gap-2">
-          <input
-            value={newComment}
-            onChange={e => setNewComment(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handlePostComment()}
-            placeholder="Add a comment..."
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
-          />
-          <button
-            onClick={handlePostComment}
-            disabled={!newComment.trim() || posting}
-            className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white p-2 rounded-lg transition-colors"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </div>
+        <div className="px-5 py-4 border-t border-gray-800">
+  <style>{`
+    .comment-nebula-input {
+      position: relative;
+      width: 100%;
+    }
+    .comment-nebula-input .input {
+      width: 100%;
+      padding: 12px 48px 12px 40px;
+      border: 2px solid #2a2a3a;
+      background: #00000f;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      border-radius: 8px;
+      transition: all 0.4s ease-out;
+      box-sizing: border-box;
+    }
+    .comment-nebula-input .user-label {
+      position: absolute;
+      left: 40px;
+      top: 12px;
+      pointer-events: none;
+      color: #6a6a8a;
+      transition: all 0.4s ease-out;
+      background: #00000f;
+      padding: 0 5px;
+      z-index: 1;
+      font-size: 14px;
+    }
+    .comment-nebula-input .input:focus {
+      border-color: #b56aff;
+      box-shadow: 0 5px 8px rgba(181,106,255,0.3), 0 10px 20px rgba(181,106,255,0.2);
+    }
+    .comment-nebula-input .input:focus ~ .user-label,
+    .comment-nebula-input .input:valid ~ .user-label {
+      transform: translateY(-25px);
+      font-size: 12px;
+      color: #d18cff;
+      left: 7px;
+      background: #00000f;
+    }
+    .comment-icon {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: #6a6a8a;
+      transition: stroke 0.4s ease-out;
+      pointer-events: none;
+    }
+    .comment-nebula-input .input:focus ~ .comment-icon {
+      stroke: #d18cff;
+    }
+    .comment-send-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: #6a6a8a;
+      transition: color 0.3s;
+      display: flex;
+      align-items: center;
+    }
+    .comment-send-btn:hover { color: #d18cff; }
+    .comment-send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .comment-nebula-particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      top: 50%;
+      left: 7px;
+      filter: blur(0.8px);
+      mix-blend-mode: screen;
+      z-index: 0;
+    }
+    .comment-nebula-input .input:focus ~ .comment-nebula-particle {
+      animation: nebula-float 2s forwards ease-out;
+    }
+    @keyframes nebula-float {
+      0% { transform: translate(0, -50%) scale(0.8); opacity: 0; background: #c774ff; }
+      20% { opacity: 0.8; }
+      100% { transform: translate(calc(var(--x) * 140px), calc(var(--y) * 35px)) scale(1.1); opacity: 0; background: #6df2ff; }
+    }
+  `}</style>
+  <div className="comment-nebula-input">
+    <input
+      className="input"
+      type="text"
+      value={newComment}
+      onChange={e => setNewComment(e.target.value)}
+      onKeyDown={e => e.key === 'Enter' && handlePostComment()}
+      required
+    />
+    <label className="user-label">Add a comment...</label>
+    <svg className="comment-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+    <button
+      className="comment-send-btn"
+      onClick={handlePostComment}
+      disabled={!newComment.trim() || posting}
+    >
+      <Send className="w-4 h-4" />
+    </button>
+    <div className="comment-nebula-particle" style={{'--x': '0.5', '--y': '-1'} as any}/>
+    <div className="comment-nebula-particle" style={{'--x': '-0.5', '--y': '-1'} as any}/>
+    <div className="comment-nebula-particle" style={{'--x': '1', '--y': '-0.5'} as any}/>
+  </div>
+</div>
       </div>
     </div>
   )
