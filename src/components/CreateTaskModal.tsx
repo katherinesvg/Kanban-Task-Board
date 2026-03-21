@@ -28,16 +28,9 @@ export function CreateTaskModal({ defaultStatus, onClose, onCreated }: Props) {
   async function handleSubmit() {
     if (!title.trim()) return
     setSaving(true)
-  
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-    console.log('User:', user, 'Error:', userError)
-  
-    if (!user) {
-      console.error('No user found!')
-      setSaving(false)
-      return
-    }
-  
+    if (!user) { setSaving(false); return }
+
     const { data: task, error } = await supabase.from('tasks').insert({
       title: title.trim(),
       description: description.trim() || null,
@@ -48,128 +41,236 @@ export function CreateTaskModal({ defaultStatus, onClose, onCreated }: Props) {
       user_id: user.id,
       position: Date.now(),
     }).select().single()
-  
-    console.log('Task insert result:', task, 'Error:', error)
-  
+
     if (!error && task && selectedLabels.length > 0) {
       await supabase.from('task_labels').insert(
         selectedLabels.map(lid => ({ task_id: task.id, label_id: lid }))
       )
     }
-  
     setSaving(false)
     onCreated()
     onClose()
   }
 
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 12px',
+    border: '1px solid rgba(175, 64, 255, 0.3)',
+    background: 'rgba(175, 64, 255, 0.05)',
+    color: 'white',
+    fontSize: '14px',
+    outline: 'none',
+    borderRadius: '8px',
+    boxSizing: 'border-box' as const,
+    transition: 'border-color 0.2s',
+    colorScheme: 'dark' as const,
+  }
+  
+  const labelStyle = {
+    fontSize: '12px',
+    color: '#8888aa',
+    marginBottom: '6px',
+    display: 'block' as const,
+  }
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-md shadow-xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
-          <h2 className="text-base font-semibold text-white">New Task</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-300"><X className="w-5 h-5" /></button>
-        </div>
-
-        <div className="p-5 flex flex-col gap-4">
-          <div>
-            <label className="text-xs text-gray-400 mb-1 block">Title *</label>
-            <input
-              autoFocus
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Task title..."
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
-            />
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      backdropFilter: 'blur(4px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 50,
+      padding: '16px',
+    }}>
+      <div style={{
+        background: 'linear-gradient(144deg, #AF40FF, #5B42F3 50%, #00DDEB)',
+        borderRadius: '20px',
+        padding: '5px',
+        width: '100%',
+        maxWidth: '460px',
+        boxShadow: 'rgba(151, 65, 252, 0.4) 0 15px 30px -5px',
+      }}>
+        <div style={{
+          background: 'rgb(2, 2, 20)',
+          borderRadius: '17px',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}>
+          {/* Header */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 20px',
+            borderBottom: '1px solid rgba(175, 64, 255, 0.2)',
+          }}>
+            <h2 style={{ color: 'white', fontWeight: 600, fontSize: '15px', margin: 0 }}>
+              New Task
+            </h2>
+            <button onClick={onClose} style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: '#6666aa', padding: '4px', display: 'flex',
+            }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'white')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#6666aa')}
+            >
+              <X size={18} />
+            </button>
           </div>
 
-          <div>
-            <label className="text-xs text-gray-400 mb-1 block">Description</label>
-            <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Add a description..."
-              rows={3}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 resize-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+          {/* Body */}
+          <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Priority</label>
-              <select
-                value={priority}
-                onChange={e => setPriority(e.target.value as any)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500"
-              >
-                <option value="low">Low</option>
-                <option value="normal">Normal</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">Due Date</label>
+              <label style={labelStyle}>Title *</label>
               <input
-                type="date"
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500"
+                autoFocus
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Task title..."
+                style={inputStyle}
+                onFocus={e => (e.target.style.borderColor = '#b56aff')}
+                onBlur={e => (e.target.style.borderColor = 'rgba(175, 64, 255, 0.3)')}
               />
             </div>
-          </div>
 
-          {teamMembers.length > 0 && (
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Assignee</label>
-              <select
-                value={assigneeId}
-                onChange={e => setAssigneeId(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500"
-              >
-                <option value="">Unassigned</option>
-                {teamMembers.map(m => (
-                  <option key={m.id} value={m.id}>{m.name}</option>
-                ))}
-              </select>
+              <label style={labelStyle}>Description</label>
+              <textarea
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Add a description..."
+                rows={3}
+                style={{ ...inputStyle, resize: 'none' }}
+                onFocus={e => (e.target.style.borderColor = '#b56aff')}
+                onBlur={e => (e.target.style.borderColor = 'rgba(175, 64, 255, 0.3)')}
+              />
             </div>
-          )}
 
-          {labels.length > 0 && (
-            <div>
-              <label className="text-xs text-gray-400 mb-2 block">Labels</label>
-              <div className="flex flex-wrap gap-2">
-                {labels.map(label => (
-                  <button
-                    key={label.id}
-                    onClick={() => setSelectedLabels(prev =>
-                      prev.includes(label.id) ? prev.filter(id => id !== label.id) : [...prev, label.id]
-                    )}
-                    className="text-xs px-2 py-1 rounded-full border transition-all"
-                    style={{
-                      borderColor: label.color,
-                      backgroundColor: selectedLabels.includes(label.id) ? label.color + '33' : 'transparent',
-                      color: label.color
-                    }}
-                  >
-                    {label.name}
-                  </button>
-                ))}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label style={labelStyle}>Priority</label>
+                <select
+                  value={priority}
+                  onChange={e => setPriority(e.target.value as any)}
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = '#b56aff')}
+                  onBlur={e => (e.target.style.borderColor = 'rgba(175, 64, 255, 0.3)')}
+                >
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Due Date</label>
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={e => setDueDate(e.target.value)}
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = '#b56aff')}
+                  onBlur={e => (e.target.style.borderColor = 'rgba(175, 64, 255, 0.3)')}
+                />
               </div>
             </div>
-          )}
-        </div>
 
-        <div className="flex gap-3 px-5 py-4 border-t border-gray-800">
-          <button onClick={onClose} className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium py-2 rounded-lg transition-colors">
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!title.trim() || saving}
-            className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2 rounded-lg transition-colors"
-          >
-            {saving ? 'Creating...' : 'Create Task'}
-          </button>
+            {teamMembers.length > 0 && (
+              <div>
+                <label style={labelStyle}>Assignee</label>
+                <select
+                  value={assigneeId}
+                  onChange={e => setAssigneeId(e.target.value)}
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = '#b56aff')}
+                  onBlur={e => (e.target.style.borderColor = 'rgba(175, 64, 255, 0.3)')}
+                >
+                  <option value="">Unassigned</option>
+                  {teamMembers.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {labels.length > 0 && (
+              <div>
+                <label style={labelStyle}>Labels</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {labels.map(label => (
+                    <button
+                      key={label.id}
+                      onClick={() => setSelectedLabels(prev =>
+                        prev.includes(label.id) ? prev.filter(id => id !== label.id) : [...prev, label.id]
+                      )}
+                      style={{
+                        fontSize: '12px',
+                        padding: '4px 12px',
+                        borderRadius: '99px',
+                        border: `1px solid ${label.color}`,
+                        backgroundColor: selectedLabels.includes(label.id) ? label.color + '33' : 'transparent',
+                        color: label.color,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {label.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            padding: '16px 20px',
+            borderTop: '1px solid rgba(175, 64, 255, 0.2)',
+          }}>
+            <button
+              onClick={onClose}
+              style={{
+                flex: 1,
+                padding: '10px',
+                borderRadius: '10px',
+                border: '1px solid rgba(175, 64, 255, 0.3)',
+                background: 'transparent',
+                color: '#8888aa',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = '#b56aff')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(175, 64, 255, 0.3)')}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!title.trim() || saving}
+              style={{
+                flex: 1,
+                padding: '10px',
+                borderRadius: '10px',
+                border: 'none',
+                background: 'linear-gradient(144deg, #AF40FF, #5B42F3 50%, #00DDEB)',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: !title.trim() || saving ? 0.5 : 1,
+                transition: 'opacity 0.2s',
+              }}
+            >
+              {saving ? 'Creating...' : 'Create Task'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
